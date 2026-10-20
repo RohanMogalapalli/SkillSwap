@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Book Session - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-8">
+    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>📅 Session Booking</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-1">Schedule with {{ match.mentor_name }}</h2>
+        <p class="text-sm text-slate-500 mb-6">Topic: <span class="font-semibold text-slate-800">{{ match.skill_name }}</span></p>
+
+        <!-- Mentor Availability Highlights -->
+        {% if slots %}
+        <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Mentor's Preferred Time Slots</h4>
+            <div class="space-y-1 text-xs text-slate-700">
+                {% for slot in slots %}
+                <div class="flex items-center space-x-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span class="font-semibold">{{ slot.day_of_week }}:</span>
+                    <span>{{ slot.start_time }} – {{ slot.end_time }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('book_session_route', match_id=match.match_id) }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Session Date</label>
+                <input type="date" name="scheduled_date" required 
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Start Time</label>
+                    <input type="time" name="start_time" value="17:00" required 
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">End Time</label>
+                    <input type="time" name="end_time" value="18:30" required 
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Duration (Hours)</label>
+                <input type="number" step="0.5" min="0.5" max="4.0" name="duration" value="1.5" required id="duration_input"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                       onchange="document.getElementById('cost_display').innerText = (this.value * 10).toFixed(0)">
+            </div>
+
+            <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100 flex justify-between items-center text-xs">
+                <div>
+                    <p class="font-bold text-indigo-900">Credit Cost</p>
+                    <p class="text-indigo-600">Standard rate: 10 credits / hour</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xl font-extrabold text-brand-600" id="cost_display">15</span>
+                    <span class="font-semibold text-slate-600">credits</span>
+                    <p class="text-[11px] text-slate-400">Wallet balance: {{ balance }}</p>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-md shadow-brand-500/20 text-sm mt-4">
+                Confirm &amp; Send Request to Mentor
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

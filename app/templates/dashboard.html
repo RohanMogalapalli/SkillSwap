@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header Banner & Quick Actions -->
+    <div class="bg-gradient-to-r from-brand-700 to-indigo-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur text-brand-100 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>{{ current_user.department }} &bull; Year {{ current_user.year }} &bull; {{ current_user.role }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Welcome, {{ current_user.name }}!</h1>
+            <p class="text-brand-100 text-sm mt-1 max-w-xl">
+                SkillSwap connects you to campus peers. Teach skills to earn credits, and spend credits to master new abilities.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('offer_skill') }}" class="px-4 py-2.5 bg-white text-brand-700 hover:bg-brand-50 font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition flex items-center space-x-1.5">
+                <span>+ Offer a Skill (Mentor)</span>
+            </a>
+            <a href="{{ url_for('request_skill') }}" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-400 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition flex items-center space-x-1.5">
+                <span>⚡ Request a Skill (Learner)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards (Backed by Oracle View v_student_dashboard) -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Credit Balance -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <span>Skill Wallet</span>
+                <span class="text-emerald-500 font-extrabold">Active</span>
+            </div>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-slate-900">{{ "%.1f"|format(stats.credit_balance or 0) }}</span>
+                <span class="text-xs text-slate-500 font-semibold">credits</span>
+            </div>
+            <a href="{{ url_for('credits') }}" class="text-xs font-semibold text-brand-600 hover:underline mt-2 inline-block">View Ledger &rarr;</a>
+        </div>
+
+        <!-- Hours Learned -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hours Learned</div>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-indigo-600">{{ stats.hours_learned or 0 }}</span>
+                <span class="text-xs text-slate-500 font-semibold">hrs</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">Sessions as Learner</p>
+        </div>
+
+        <!-- Hours Taught -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hours Taught</div>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-emerald-600">{{ stats.hours_taught or 0 }}</span>
+                <span class="text-xs text-slate-500 font-semibold">hrs</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">Sessions as Mentor</p>
+        </div>
+
+        <!-- Mentor Rating -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mentor Rating</div>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-amber-500">
+                    {% if stats.mentor_rating > 0 %}{{ "%.1f"|format(stats.mentor_rating) }}{% else %}—{% endif %}
+                </span>
+                <span class="text-xs text-slate-500 font-semibold">/ 5.0</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">From student feedback</p>
+        </div>
+
+        <!-- Certificates -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Certificates</div>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-purple-600">{{ stats.certificates_earned or 0 }}</span>
+                <span class="text-xs text-slate-500 font-semibold">issued</span>
+            </div>
+            <a href="{{ url_for('certificates') }}" class="text-xs font-semibold text-purple-600 hover:underline mt-2 inline-block">View Awards &rarr;</a>
+        </div>
+    </div>
+
+    <!-- Active & Upcoming Sessions -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Upcoming &amp; Pending Sessions</h2>
+                <p class="text-xs text-slate-500">Scheduled peer learning sessions requiring action</p>
+            </div>
+            <a href="{{ url_for('sessions_list') }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">All Sessions &rarr;</a>
+        </div>
+
+        {% if upcoming_sessions %}
+        <div class="divide-y divide-slate-100">
+            {% for s in upcoming_sessions %}
+            <div class="py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold text-sm">
+                        #{{ s.session_id }}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">{{ s.skill_name }}</h4>
+                        <p class="text-xs text-slate-500">
+                            {% if s.mentor_id == current_user.user_id %}
+                                Teaching <span class="font-semibold text-slate-700">{{ s.learner_name }}</span>
+                            {% else %}
+                                Learning from <span class="font-semibold text-slate-700">{{ s.mentor_name }}</span>
+                            {% endif %}
+                            &bull; {{ s.scheduled_date.strftime('%Y-%m-%d') if s.scheduled_date else '' }} at {{ s.start_time }}-{{ s.end_time }} ({{ s.duration }} hrs)
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full 
+                        {% if s.status == 'REQUESTED' %}bg-amber-100 text-amber-800
+                        {% elif s.status == 'ACCEPTED' %}bg-sky-100 text-sky-800
+                        {% elif s.status == 'SCHEDULED' %}bg-indigo-100 text-indigo-800
+                        {% elif s.status == 'COMPLETED' %}bg-emerald-100 text-emerald-800
+                        {% else %}bg-slate-100 text-slate-700{% endif %}">
+                        {{ s.status }}
+                    </span>
+                    <span class="text-xs font-bold text-slate-700">{{ "%.0f"|format(s.credit_cost) }} credits</span>
+                    
+                    <!-- Action buttons -->
+                    {% if s.mentor_id == current_user.user_id and s.status == 'REQUESTED' %}
+                    <form method="POST" action="{{ url_for('accept_session', session_id=s.session_id) }}">
+                        <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition">Accept</button>
+                    </form>
+                    {% elif s.status in ['ACCEPTED', 'SCHEDULED'] %}
+                    <form method="POST" action="{{ url_for('complete_session_route', session_id=s.session_id) }}">
+                        <button type="submit" class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition">Complete &bull; Transfer Credits</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-slate-400 text-xs">
+            No upcoming sessions. <a href="{{ url_for('skills_catalog') }}" class="text-brand-600 font-semibold underline">Browse skills</a> to book one!
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Two Column Grid: Skills Offered vs Skill Requests -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Skills I Teach (Mentor Mode) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Skills I Teach (Mentor)</h3>
+                    <p class="text-xs text-slate-500">Skills you share with peers</p>
+                </div>
+                <a href="{{ url_for('offer_skill') }}" class="text-xs font-semibold text-brand-600 hover:underline">+ Add Skill</a>
+            </div>
+
+            {% if offered_skills %}
+            <div class="space-y-3">
+                {% for os in offered_skills %}
+                <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">{{ os.skill_name }}</h4>
+                        <p class="text-xs text-slate-400">{{ os.category_name }} &bull; {{ os.experience_years }} yrs exp</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-700">{{ os.proficiency_level }}</span>
+                        <p class="text-[11px] text-slate-500 mt-1">{{ os.available_hours }} hrs/wk</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-6 text-slate-400 text-xs">
+                You haven't listed any skills yet. <a href="{{ url_for('offer_skill') }}" class="text-brand-600 font-semibold underline">Offer one now</a>.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Skills I Want to Learn (Learner Mode) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Skills I Want to Learn (Learner)</h3>
+                    <p class="text-xs text-slate-500">Your requested skills and mentor matches</p>
+                </div>
+                <a href="{{ url_for('request_skill') }}" class="text-xs font-semibold text-brand-600 hover:underline">+ Request</a>
+            </div>
+
+            {% if my_requests %}
+            <div class="space-y-3">
+                {% for r in my_requests %}
+                <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">{{ r.skill_name }}</h4>
+                        <p class="text-xs text-slate-400">Target: {{ r.desired_level }} &bull; Priority: {{ r.priority }}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full {% if r.status == 'MATCHED' %}bg-emerald-100 text-emerald-800{% else %}bg-slate-200 text-slate-700{% endif %}">
+                            {{ r.status }}
+                        </span>
+                        <div class="mt-1">
+                            <a href="{{ url_for('view_matches', request_id=r.request_id) }}" class="text-xs font-bold text-brand-600 hover:underline">
+                                View Matches ({{ r.match_count }}) &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-6 text-slate-400 text-xs">
+                No active skill requests. <a href="{{ url_for('request_skill') }}" class="text-brand-600 font-semibold underline">Submit a request</a>.
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

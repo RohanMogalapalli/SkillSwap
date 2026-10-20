@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Portal - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-bold uppercase tracking-wider mb-2">
+                <span>🛡️ System Administration</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Platform Management Console</h1>
+            <p class="text-sm text-slate-500">Moderation, student wallets, dispute resolution, and market metrics</p>
+        </div>
+        <a href="{{ url_for('dbms_showcase') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+            View Live DBMS Showcase &rarr;
+        </a>
+    </div>
+
+    <!-- Incident Reports Resolution Queue -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1">Dispute &amp; Incident Reports Queue</h2>
+        <p class="text-xs text-slate-500 mb-4">Pending reports requiring administrative intervention</p>
+
+        {% if reports %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th class="py-3 px-3">Report #</th>
+                        <th class="py-3 px-3">Reporter</th>
+                        <th class="py-3 px-3">Reported User</th>
+                        <th class="py-3 px-3">Reason</th>
+                        <th class="py-3 px-3">Description</th>
+                        <th class="py-3 px-3">Status</th>
+                        <th class="py-3 px-3 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for r in reports %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3 font-mono font-bold text-slate-400">#{{ r.report_id }}</td>
+                        <td class="py-3.5 px-3 font-semibold text-slate-800">{{ r.reporter_name }}</td>
+                        <td class="py-3.5 px-3 font-semibold text-rose-700">{{ r.reported_name }}</td>
+                        <td class="py-3.5 px-3 font-medium">{{ r.reason }}</td>
+                        <td class="py-3.5 px-3 max-w-xs truncate text-slate-500">{{ r.description }}</td>
+                        <td class="py-3.5 px-3">
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase
+                                {% if r.status == 'RESOLVED' %}bg-emerald-100 text-emerald-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                {{ r.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 text-right">
+                            {% if r.status != 'RESOLVED' %}
+                            <form method="POST" action="{{ url_for('resolve_report', report_id=r.report_id) }}" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                    Mark Resolved
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-slate-400 text-[11px]">Resolved</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-6 text-slate-400 text-xs">No reports currently in queue.</div>
+        {% endif %}
+    </div>
+
+    <!-- Student Accounts Table -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1">Registered Campus Users &amp; Wallets</h2>
+        <p class="text-xs text-slate-500 mb-4">Live student accounts and wallet balances in Oracle DB</p>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th class="py-3 px-3">User ID</th>
+                        <th class="py-3 px-3">Name</th>
+                        <th class="py-3 px-3">Email</th>
+                        <th class="py-3 px-3">Department</th>
+                        <th class="py-3 px-3">Role</th>
+                        <th class="py-3 px-3">Balance</th>
+                        <th class="py-3 px-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for u in users %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3 font-mono font-bold text-slate-400">#{{ u.user_id }}</td>
+                        <td class="py-3.5 px-3 font-bold text-slate-900">{{ u.name }}</td>
+                        <td class="py-3.5 px-3 text-slate-500">{{ u.email }}</td>
+                        <td class="py-3.5 px-3">{{ u.department }} (Yr {{ u.year }})</td>
+                        <td class="py-3.5 px-3 font-semibold text-purple-700">{{ u.role }}</td>
+                        <td class="py-3.5 px-3 font-bold text-brand-600">{{ "%.2f"|format(u.balance or 0) }} pts</td>
+                        <td class="py-3.5 px-3">
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">{{ u.status }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

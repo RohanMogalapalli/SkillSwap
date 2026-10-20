@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}My Sessions - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Peer Learning Sessions</h1>
+            <p class="text-sm text-slate-500">Track, schedule, accept, and complete learning exchanges</p>
+        </div>
+        <a href="{{ url_for('skills_catalog') }}" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+            + Schedule New Session
+        </a>
+    </div>
+
+    <!-- Sessions As Learner -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center space-x-2">
+            <span>Sessions As Learner</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold">{{ as_learner|length }}</span>
+        </h2>
+        <p class="text-xs text-slate-500 mb-4">Sessions where you are receiving mentorship from campus peers</p>
+
+        {% if as_learner %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th class="py-3 px-3">Session #</th>
+                        <th class="py-3 px-3">Skill</th>
+                        <th class="py-3 px-3">Mentor</th>
+                        <th class="py-3 px-3">Schedule</th>
+                        <th class="py-3 px-3">Duration</th>
+                        <th class="py-3 px-3">Cost</th>
+                        <th class="py-3 px-3">Status</th>
+                        <th class="py-3 px-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for s in as_learner %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3 font-mono font-bold text-slate-400">#{{ s.session_id }}</td>
+                        <td class="py-3.5 px-3 font-bold text-slate-900">{{ s.skill_name }}</td>
+                        <td class="py-3.5 px-3">
+                            <span class="font-semibold text-slate-800">{{ s.mentor_name }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ s.mentor_email }}</span>
+                        </td>
+                        <td class="py-3.5 px-3">
+                            <span class="font-medium text-slate-800">{{ s.scheduled_date.strftime('%Y-%m-%d') if s.scheduled_date else '' }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ s.start_time }} – {{ s.end_time }}</span>
+                        </td>
+                        <td class="py-3.5 px-3 font-semibold">{{ s.duration }} hrs</td>
+                        <td class="py-3.5 px-3 font-bold text-brand-600">{{ "%.0f"|format(s.credit_cost) }} credits</td>
+                        <td class="py-3.5 px-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold
+                                {% if s.status == 'COMPLETED' %}bg-emerald-100 text-emerald-800
+                                {% elif s.status == 'REQUESTED' %}bg-amber-100 text-amber-800
+                                {% elif s.status == 'ACCEPTED' %}bg-sky-100 text-sky-800
+                                {% elif s.status == 'SCHEDULED' %}bg-indigo-100 text-indigo-800
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ s.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 text-right space-x-2">
+                            {% if s.status in ['ACCEPTED', 'SCHEDULED'] %}
+                            <form method="POST" action="{{ url_for('complete_session_route', session_id=s.session_id) }}" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                    Complete Session
+                                </button>
+                            </form>
+                            {% elif s.status == 'COMPLETED' %}
+                                {% if s.user_rating %}
+                                <span class="text-amber-600 font-bold">Rated ★ {{ "%.1f"|format(s.user_rating) }}</span>
+                                {% else %}
+                                <a href="{{ url_for('rate_mentor', session_id=s.session_id) }}" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition">
+                                    Rate Mentor
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-6 text-slate-400 text-xs">No learner sessions booked yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- Sessions As Mentor -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center space-x-2">
+            <span>Sessions As Mentor</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">{{ as_mentor|length }}</span>
+        </h2>
+        <p class="text-xs text-slate-500 mb-4">Sessions where you teach campus peers and earn Skill Credits</p>
+
+        {% if as_mentor %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th class="py-3 px-3">Session #</th>
+                        <th class="py-3 px-3">Skill</th>
+                        <th class="py-3 px-3">Learner</th>
+                        <th class="py-3 px-3">Schedule</th>
+                        <th class="py-3 px-3">Duration</th>
+                        <th class="py-3 px-3">Cost</th>
+                        <th class="py-3 px-3">Status</th>
+                        <th class="py-3 px-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for s in as_mentor %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3 font-mono font-bold text-slate-400">#{{ s.session_id }}</td>
+                        <td class="py-3.5 px-3 font-bold text-slate-900">{{ s.skill_name }}</td>
+                        <td class="py-3.5 px-3">
+                            <span class="font-semibold text-slate-800">{{ s.learner_name }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ s.learner_email }}</span>
+                        </td>
+                        <td class="py-3.5 px-3">
+                            <span class="font-medium text-slate-800">{{ s.scheduled_date.strftime('%Y-%m-%d') if s.scheduled_date else '' }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ s.start_time }} – {{ s.end_time }}</span>
+                        </td>
+                        <td class="py-3.5 px-3 font-semibold">{{ s.duration }} hrs</td>
+                        <td class="py-3.5 px-3 font-bold text-emerald-600">+{{ "%.0f"|format(s.credit_cost) }} credits</td>
+                        <td class="py-3.5 px-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold
+                                {% if s.status == 'COMPLETED' %}bg-emerald-100 text-emerald-800
+                                {% elif s.status == 'REQUESTED' %}bg-amber-100 text-amber-800
+                                {% elif s.status == 'ACCEPTED' %}bg-sky-100 text-sky-800
+                                {% elif s.status == 'SCHEDULED' %}bg-indigo-100 text-indigo-800
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ s.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 text-right space-x-2">
+                            {% if s.status == 'REQUESTED' %}
+                            <form method="POST" action="{{ url_for('accept_session', session_id=s.session_id) }}" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                    Accept Request
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('cancel_session', session_id=s.session_id) }}" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">
+                                    Decline
+                                </button>
+                            </form>
+                            {% elif s.status in ['ACCEPTED', 'SCHEDULED'] %}
+                            <form method="POST" action="{{ url_for('complete_session_route', session_id=s.session_id) }}" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                    Complete &bull; Claim Credits
+                                </button>
+                            </form>
+                            {% elif s.status == 'COMPLETED' and s.received_rating %}
+                            <span class="text-amber-600 font-bold">Feedback: ★ {{ "%.1f"|format(s.received_rating) }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-6 text-slate-400 text-xs">No mentorship sessions yet.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

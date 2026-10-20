@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Reports &amp; Support - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl mx-auto py-4">
+
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-extrabold text-slate-900">Incident &amp; Dispute Reports</h1>
+        <p class="text-sm text-slate-500">Report scheduling conflicts, no-shows, or platform issues for moderation</p>
+    </div>
+
+    <!-- Submit Report Form -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-base font-bold text-slate-900 mb-4">File a New Report</h2>
+        <form method="POST" action="{{ url_for('user_reports') }}" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Involved User</label>
+                    <select name="reported_user_id" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        {% for u in users %}
+                        <option value="{{ u.user_id }}">{{ u.name }} ({{ u.department }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Reason</label>
+                    <select name="reason" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                        <option value="No-Show">Student did not attend scheduled session</option>
+                        <option value="Scheduling Conflict">Last-minute cancellation or timing dispute</option>
+                        <option value="Conduct">Inappropriate behavior or language</option>
+                        <option value="Technical Issue">Audio/Video or connection difficulty</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Detailed Description</label>
+                <textarea name="description" rows="3" required placeholder="Please provide specific details..." 
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"></textarea>
+            </div>
+
+            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-sm transition">
+                Submit Report to Administration
+            </button>
+        </form>
+    </div>
+
+    <!-- Prior Reports History -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-base font-bold text-slate-900 mb-4">My Submitted Reports</h2>
+
+        {% if reports %}
+        <div class="space-y-3">
+            {% for r in reports %}
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-sm text-slate-800">{{ r.reason }}</span>
+                        <span class="text-xs text-slate-500">regarding {{ r.reported_person_name }}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-1">{{ r.description }}</p>
+                    <span class="text-[11px] text-slate-400 mt-2 block">{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '' }}</span>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase
+                    {% if r.status == 'RESOLVED' %}bg-emerald-100 text-emerald-800
+                    {% elif r.status == 'INVESTIGATING' %}bg-amber-100 text-amber-800
+                    {% else %}bg-rose-100 text-rose-800{% endif %}">
+                    {{ r.status }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-6 text-slate-400 text-xs">No reports submitted.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

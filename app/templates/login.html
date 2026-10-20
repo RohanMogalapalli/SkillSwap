@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <!-- Standard Login Card -->
+        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Student &amp; Faculty Login</h2>
+            <p class="text-sm text-slate-500 mb-6">Enter your registered campus email and password.</p>
+            
+            <form method="POST" action="{{ url_for('login') }}" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Campus Email</label>
+                    <input type="email" name="email" required placeholder="e.g. rohan@campus.edu" 
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••" 
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-md shadow-brand-500/20 text-sm">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
+                New student on campus? <a href="{{ url_for('register') }}" class="text-brand-600 font-semibold hover:underline">Register with 50 welcome credits</a>
+            </div>
+        </div>
+
+        <!-- 1-Click Evaluation Personas -->
+        <div class="bg-indigo-50/60 p-8 rounded-2xl border border-indigo-100">
+            <div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2">
+                <span>⚡ Reviewer Quick Access</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">1-Click Demo Accounts</h3>
+            <p class="text-xs text-slate-500 mb-4">Click any pre-seeded persona to instantly log in and inspect live data:</p>
+
+            <div class="space-y-2">
+                {% for u in demo_users %}
+                <a href="{{ url_for('quick_login', user_id=u.user_id) }}" 
+                   class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 hover:border-brand-500 hover:shadow-sm transition group">
+                    <div>
+                        <p class="text-sm font-bold text-slate-800 group-hover:text-brand-600 transition">{{ u.name }}</p>
+                        <p class="text-xs text-slate-400">{{ u.email }} &bull; {{ u.department }}</p>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full {% if u.role == 'ADMIN' %}bg-purple-100 text-purple-700{% else %}bg-slate-100 text-slate-600{% endif %}">
+                        {{ u.role }} &rarr;
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

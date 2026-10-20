@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}SkillSwap - Campus Skill Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-12">
+    <!-- Hero Section -->
+    <div class="text-center max-w-3xl mx-auto py-12 px-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-6">
+            <span>✨ Peer-to-Peer Campus Knowledge Exchange</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Learn a skill by <span class="bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent">teaching a skill</span>.
+        </h1>
+        <p class="mt-4 text-lg text-slate-600 leading-relaxed">
+            SkillSwap eliminates monetary barriers from college peer learning. Teach Python, earn Skill Credits, and spend them to learn UI Design, Web Dev, or Guitar from fellow students.
+        </p>
+        <div class="mt-8 flex justify-center gap-4">
+            <a href="{{ url_for('login') }}" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/25 transition">
+                Start Learning &bull; Quick Login
+            </a>
+            <a href="{{ url_for('dbms_showcase') }}" class="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-300 transition shadow-sm">
+                View DBS Architecture
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Campus Stats Counters -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+            <p class="text-3xl font-extrabold text-brand-600">{{ stats.users }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Campus Students</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+            <p class="text-3xl font-extrabold text-indigo-600">{{ stats.skills }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Skills Offered</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+            <p class="text-3xl font-extrabold text-emerald-600">{{ stats.sessions }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Sessions Completed</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+            <p class="text-3xl font-extrabold text-amber-500">{{ stats.credits }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Credits in Circulation</p>
+        </div>
+    </div>
+
+    <!-- Top Ranked Mentors on Campus (from Oracle View v_top_mentors) -->
+    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Featured Campus Mentors</h2>
+                <p class="text-sm text-slate-500">Ranked by peer ratings and completed teaching hours (Oracle View: <code>v_top_mentors</code>)</p>
+            </div>
+            <a href="{{ url_for('skills_catalog') }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700">View All &rarr;</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for m in top_mentors %}
+            <div class="p-5 rounded-xl border border-slate-100 bg-slate-50 hover:border-brand-200 transition">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center">
+                        {{ m.mentor_name[0] }}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">{{ m.mentor_name }}</h3>
+                        <p class="text-xs text-slate-500">{{ m.department }} &bull; Year {{ m.year }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs pt-3 border-t border-slate-200 text-slate-600">
+                    <span class="font-semibold text-amber-600 flex items-center">
+                        ★ {{ "%.2f"|format(m.average_rating) }} ({{ m.total_reviews }} reviews)
+                    </span>
+                    <span>{{ m.total_hours_taught }} hrs taught</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

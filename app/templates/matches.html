@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Mentor Matches - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto py-4">
+
+    <!-- Request Overview Card -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-1">
+                <span>Request #{{ req.request_id }}</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900">{{ req.skill_name }}</h1>
+            <p class="text-xs text-slate-500 mt-1">Desired Level: <span class="font-bold text-slate-700">{{ req.desired_level }}</span> &bull; Priority: <span class="font-bold text-slate-700">{{ req.priority }}</span></p>
+        </div>
+        <div class="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 text-right">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Algorithm</p>
+            <p class="text-xs text-indigo-900 font-medium">PL/SQL <code>calculate_match_score()</code></p>
+        </div>
+    </div>
+
+    <!-- Match Results -->
+    <div class="space-y-4">
+        <h2 class="text-lg font-bold text-slate-800">Scored Mentor Candidates ({{ matches|length }})</h2>
+
+        {% if matches %}
+            {% for m in matches %}
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-300 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md shadow-brand-500/20 flex-shrink-0">
+                        {{ m.mentor_name[0] }}
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="font-bold text-base text-slate-900">{{ m.mentor_name }}</h3>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">{{ m.department }} &bull; Yr {{ m.year }}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ m.email }}</p>
+                        
+                        <div class="flex flex-wrap gap-3 mt-3 text-xs text-slate-600">
+                            <span class="font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md">
+                                Level: {{ m.proficiency_level }}
+                            </span>
+                            <span class="bg-slate-100 px-2 py-0.5 rounded-md">
+                                {{ m.experience_years }} yrs experience
+                            </span>
+                            <span class="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-md flex items-center">
+                                ★ {{ "%.1f"|format(m.mentor_rating) }} rating
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row md:flex-col items-end gap-3 w-full md:w-auto justify-between">
+                    <div class="text-right">
+                        <div class="inline-flex items-baseline space-x-1">
+                            <span class="text-2xl font-black text-brand-600">{{ "%.1f"|format(m.match_score) }}</span>
+                            <span class="text-xs font-semibold text-slate-400">/ 100</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Match Compatibility</p>
+                    </div>
+
+                    <a href="{{ url_for('book_session_route', match_id=m.match_id) }}" 
+                       class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+                        Schedule Session &rarr;
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="bg-white p-12 text-center rounded-2xl border border-slate-200 text-slate-400 text-sm">
+            <p>No mentors currently meet the compatibility threshold for this skill.</p>
+            <p class="text-xs mt-1 text-slate-500">Other students will be notified when they offer {{ req.skill_name }}.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

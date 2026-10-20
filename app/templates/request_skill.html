@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Request a Skill - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-8">
+    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>🚀 Learner Mode</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Request a Skill to Learn</h2>
+        <p class="text-sm text-slate-500 mb-6">Our PL/SQL matching engine will automatically identify and score mentors based on proficiency, ratings, and experience.</p>
+
+        <form method="POST" action="{{ url_for('request_skill') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Skill to Learn</label>
+                <select name="skill_id" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                    {% for s in skills %}
+                    <option value="{{ s.skill_id }}" {% if request.args.get('skill_id')|string == s.skill_id|string %}selected{% endif %}>
+                        {{ s.skill_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Target Proficiency Desired</label>
+                <select name="desired_level" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                    <option value="BEGINNER" selected>Beginner (Never coded/done before)</option>
+                    <option value="INTERMEDIATE">Intermediate (Need practice &amp; guidance)</option>
+                    <option value="ADVANCED">Advanced (Deep dive into complex topics)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Request Priority</label>
+                <select name="priority" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                    <option value="MEDIUM" selected>Medium (Within next couple of weeks)</option>
+                    <option value="HIGH">High (Urgent project / exam preparation)</option>
+                    <option value="LOW">Low (Casual exploratory learning)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-md shadow-brand-500/20 text-sm mt-4">
+                Submit Request &bull; Run Matching Algorithm
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Certificate - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center">
+        <div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>🛡️ Public Verification Portal</span>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">Verify Student Credential</h1>
+        <p class="text-xs text-slate-500 mb-6">Enter the certificate code to validate authenticity directly against Oracle Database records.</p>
+
+        <form method="GET" action="{{ url_for('verify_certificate') }}" class="flex gap-2 max-w-md mx-auto mb-8">
+            <input type="text" name="code" value="{{ search_code or '' }}" placeholder="e.g. CERT-PYTH-2026-0002" required 
+                   class="flex-grow px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-mono uppercase">
+            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-sm transition">
+                Verify
+            </button>
+        </form>
+
+        {% if certificate %}
+        <div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 text-white p-8 rounded-2xl border border-emerald-500/30 text-left shadow-lg">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <span>✓ Authentic Campus Credential</span>
+                </span>
+                <span class="font-mono text-xs text-slate-300">{{ certificate.certificate_code }}</span>
+            </div>
+
+            <div class="my-6">
+                <p class="text-xs text-slate-400">Recipient Student:</p>
+                <h3 class="text-xl font-bold text-white">{{ certificate.student_name }}</h3>
+                <p class="text-xs text-slate-400">{{ certificate.department }} &bull; Year {{ certificate.year }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-xs">
+                <div>
+                    <span class="text-slate-400">Certified Skill:</span>
+                    <p class="font-bold text-emerald-300 text-sm mt-0.5">{{ certificate.skill_name }}</p>
+                    <span class="text-[11px] text-slate-500">{{ certificate.category_name }}</span>
+                </div>
+                <div>
+                    <span class="text-slate-400">Hours Completed:</span>
+                    <p class="font-bold text-white text-sm mt-0.5">{{ certificate.hours_completed }} Hours</p>
+                    <span class="text-[11px] text-slate-500">Issued on: {{ certificate.issue_date.strftime('%Y-%m-%d') if certificate.issue_date else '' }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

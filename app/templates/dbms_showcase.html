@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}DBMS Concept Showcase - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="space-y-10">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-emerald-200 text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>🎓 Academic Review Showcase &bull; VIT DBMS</span>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight">Database Management Systems Concepts</h1>
+        <p class="text-emerald-100 text-sm mt-2 max-w-2xl leading-relaxed">
+            Live demonstration of 3NF relational normalization, SQL joins, aggregate functions, database views, PL/SQL triggers, and ACID transactions running on <strong>Oracle Database 21c XE</strong>.
+        </p>
+        <div class="mt-4 pt-4 border-t border-emerald-700/60 text-xs text-emerald-200">
+            Submitted by: <strong class="text-white">Mogalapalli Rohan (24BCE2622)</strong> &amp; <strong class="text-white">N. Sai Hemanth (24BCE2400)</strong>
+        </div>
+    </div>
+
+    <!-- Live 15 Tables Relational Counts -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">1. All 15 Relational Tables (Live Counts)</h2>
+                <p class="text-xs text-slate-500">Enforcing PKs, FKs, CHECK constraints, and NOT NULL across entities</p>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full">15/15 Active</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {% for c in counts %}
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                <p class="text-xs font-mono font-bold text-slate-600 truncate">{{ c.tbl }}</p>
+                <p class="text-xl font-black text-brand-600 mt-1">{{ c.cnt }}</p>
+                <span class="text-[10px] text-slate-400">rows</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Normalization & Design Decisions Explanation -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-sm mb-3">1</div>
+            <h3 class="font-bold text-slate-900 text-sm mb-1">Users &amp; Dual Roles</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                A single student can teach Python (Mentor) while learning Photoshop (Learner). The unified <code>Users</code> table prevents data redundancy and simplifies authentication.
+            </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 font-bold flex items-center justify-center text-sm mb-3">2</div>
+            <h3 class="font-bold text-slate-900 text-sm mb-1">N:M Skill Decomposition</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                N:M relationships between Students and Skills are resolved via two 3NF junction tables: <code>User_Skills</code> (teaching) and <code>Skill_Requests</code> (learning).
+            </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 font-bold flex items-center justify-center text-sm mb-3">3</div>
+            <h3 class="font-bold text-slate-900 text-sm mb-1">Double-Entry Financial Ledger</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                <code>Credit_Accounts</code> maintains 1:1 running balances, while <code>Credit_Transactions</code> preserves an immutable audit trail of every credit debit and credit deposit.
+            </p>
+        </div>
+    </div>
+
+    <!-- Live Oracle Views -->
+    <div class="space-y-6">
+        <h2 class="text-xl font-bold text-slate-900">2. Database Views in Action</h2>
+
+        <!-- View 1: Top Mentors View -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Top Mentors View (<code>v_top_mentors</code>)</h3>
+                    <p class="text-xs text-slate-500">Complex multi-table join aggregating sessions, duration, and star ratings</p>
+                </div>
+                <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">VIEW</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold">
+                            <th class="py-2.5 px-3">Mentor</th>
+                            <th class="py-2.5 px-3">Department</th>
+                            <th class="py-2.5 px-3">Sessions Conducted</th>
+                            <th class="py-2.5 px-3">Avg Rating</th>
+                            <th class="py-2.5 px-3">Reviews</th>
+                            <th class="py-2.5 px-3">Hours Taught</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for m in top_mentors %}
+                        <tr>
+                            <td class="py-2.5 px-3 font-bold text-slate-900">{{ m.mentor_name }}</td>
+                            <td class="py-2.5 px-3">{{ m.department }} (Yr {{ m.year }})</td>
+                            <td class="py-2.5 px-3 font-semibold">{{ m.total_sessions_conducted }}</td>
+                            <td class="py-2.5 px-3 font-bold text-amber-600">★ {{ "%.2f"|format(m.average_rating) }}</td>
+                            <td class="py-2.5 px-3">{{ m.total_reviews }}</td>
+                            <td class="py-2.5 px-3 font-bold text-emerald-600">{{ m.total_hours_taught }} hrs</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View 2: Skill Demand Market Analytics -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Skill Demand Analytics (<code>v_skill_demand_analytics</code>)</h3>
+                    <p class="text-xs text-slate-500">Evaluates supply vs. demand ratio and classifies skill markets</p>
+                </div>
+                <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">VIEW</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold">
+                            <th class="py-2.5 px-3">Skill</th>
+                            <th class="py-2.5 px-3">Category</th>
+                            <th class="py-2.5 px-3">Learner Requests</th>
+                            <th class="py-2.5 px-3">Available Mentors</th>
+                            <th class="py-2.5 px-3">Sessions Done</th>
+                            <th class="py-2.5 px-3">Market Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for mk in market %}
+                        <tr>
+                            <td class="py-2.5 px-3 font-bold text-slate-900">{{ mk.skill_name }}</td>
+                            <td class="py-2.5 px-3 text-slate-500">{{ mk.category_name }}</td>
+                            <td class="py-2.5 px-3 font-semibold">{{ mk.total_requests }}</td>
+                            <td class="py-2.5 px-3 font-semibold">{{ mk.available_mentors_count }}</td>
+                            <td class="py-2.5 px-3">{{ mk.sessions_completed }}</td>
+                            <td class="py-2.5 px-3">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+                                    {% if mk.market_status == 'Balanced' %}bg-emerald-100 text-emerald-800
+                                    {% elif mk.market_status == 'High Demand' %}bg-indigo-100 text-indigo-800
+                                    {% else %}bg-rose-100 text-rose-800{% endif %}">
+                                    {{ mk.market_status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PL/SQL Modules Documentation -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">3. PL/SQL Stored Procedures, Functions &amp; Triggers</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <span class="font-mono font-bold text-brand-700">PROCEDURE complete_session(p_session_id)</span>
+                <p class="text-slate-600">
+                    Executes atomic credit debit from learner, credit add to mentor, double-entry transaction insert, session status change, attendance insert, and automated certificate issuance. Enforces full transaction commit or automatic rollback on failure.
+                </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <span class="font-mono font-bold text-brand-700">FUNCTION calculate_match_score(p_req_id, p_mentor_id)</span>
+                <p class="text-slate-600">
+                    Weighted 0–100 matching formula: 40% proficiency tier match + 30% average star rating + 20% experience &amp; sessions + 10% availability overlap.
+                </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <span class="font-mono font-bold text-brand-700">TRIGGER trg_user_after_insert</span>
+                <p class="text-slate-600">
+                    After insert on <code>Users</code>, automatically provisions a wallet record in <code>Credit_Accounts</code> with 50 welcome credits, adds a bonus ledger transaction, and creates a welcome notification.
+                </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                <span class="font-mono font-bold text-brand-700">TRIGGER trg_check_session_integrity</span>
+                <p class="text-slate-600">
+                    Before insert/update on <code>Sessions</code>, validates that mentor and learner are distinct students, duration > 0, and credit cost >= 0.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
